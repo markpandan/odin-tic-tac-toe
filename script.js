@@ -27,12 +27,15 @@ player2Score.textContent = `Score: ${players[1].getScore()}`;
 status.textContent = `${game.getActivePlayer().name}'s turn`;
 
 const ticTacToeBoard = document.querySelector(".board");
+let updateBoard = true;
 ticTacToeBoard.addEventListener("click", (e) => {
-  let cell = document.querySelector("#" + e.target.id);
+  if (!updateBoard) return;
 
+  let cell = document.querySelector("#" + e.target.id);
   if (!cell.textContent) {
     let activePlayer = game.getActivePlayer();
     cell.textContent = activePlayer.selector;
+
     if (game.playRound(cell.dataset.index)) {
       activePlayer = game.getActivePlayer();
       status.textContent = `${activePlayer.name}'s turn`;
@@ -41,6 +44,7 @@ ticTacToeBoard.addEventListener("click", (e) => {
       activePlayer = game.getActivePlayer();
       status.textContent = `${activePlayer.name} wins!`;
       updateScore(activePlayer.name, activePlayer.getScore());
+      updateBoard = false;
     }
   }
 });
@@ -49,4 +53,5 @@ resetBoard.addEventListener("click", (e) => {
   game.resetGame();
   const board = document.querySelectorAll(".board > *");
   board.forEach((cell) => (cell.textContent = ""));
+  updateBoard = true;
 });

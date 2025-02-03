@@ -28,6 +28,8 @@ status.textContent = `${game.getActivePlayer().name}'s turn`;
 
 const ticTacToeBoard = document.querySelector(".board");
 let updateBoard = true;
+
+let roundCount = 0;
 ticTacToeBoard.addEventListener("click", (e) => {
   if (!updateBoard) return;
 
@@ -39,6 +41,11 @@ ticTacToeBoard.addEventListener("click", (e) => {
     if (game.playRound(cell.dataset.index)) {
       activePlayer = game.getActivePlayer();
       status.textContent = `${activePlayer.name}'s turn`;
+      roundCount++;
+      if (roundCount >= 9) {
+        status.textContent = `It's a tie!`;
+        updateBoard = false;
+      }
     } else {
       // When the method inside this "if" statement will return false if a winner has been declared. Signaling that the round alreadn ended.
       activePlayer = game.getActivePlayer();
@@ -54,4 +61,7 @@ resetBoard.addEventListener("click", (e) => {
   const board = document.querySelectorAll(".board > *");
   board.forEach((cell) => (cell.textContent = ""));
   updateBoard = true;
+  roundCount = 0;
+
+  status.textContent = `${game.getActivePlayer().name}'s turn`;
 });

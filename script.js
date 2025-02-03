@@ -8,6 +8,13 @@ const status = document.querySelector(".status");
 const resetBoard = document.querySelector(".reset-board");
 
 const game = GameDirector();
+function updateScore(name, score) {
+  if (player1Name.textContent === name) {
+    player1Score.textContent = `Score: ${score}`;
+  } else if (player2Name.textContent === name) {
+    player2Score.textContent = `Score: ${score}`;
+  }
+}
 
 // Displays the player names and their scores
 const players = game.getPlayerList();
@@ -26,12 +33,15 @@ ticTacToeBoard.addEventListener("click", (e) => {
   if (!cell.textContent) {
     let activePlayer = game.getActivePlayer();
     cell.textContent = activePlayer.selector;
-
-    game.playRound(cell.dataset.index);
-
-    // game.playRound(cell.dataset.index) ? cell.textContent = activePlayer.selector : "";
-    activePlayer = game.getActivePlayer();
-    status.textContent = `${activePlayer.name}'s turn`;
+    if (game.playRound(cell.dataset.index)) {
+      activePlayer = game.getActivePlayer();
+      status.textContent = `${activePlayer.name}'s turn`;
+    } else {
+      // When the method inside this "if" statement will return false if a winner has been declared. Signaling that the round alreadn ended.
+      activePlayer = game.getActivePlayer();
+      status.textContent = `${activePlayer.name} wins!`;
+      updateScore(activePlayer.name, activePlayer.getScore());
+    }
   }
 });
 

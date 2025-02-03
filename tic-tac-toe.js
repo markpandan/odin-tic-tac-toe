@@ -9,7 +9,6 @@ function Player(name, selector) {
 function GameBoard() {
   const boardRow = 3;
   const boardColumn = 3;
-  let hasWinner = false;
 
   // Initialize the board
   let board = [];
@@ -20,25 +19,21 @@ function GameBoard() {
     }
   }
 
-  // The position argument here requires only two numbers which corresponds to a row, and a column of the board array
-  const placeToken = function (playerToken, position) {
-    if (!hasWinner) {
-      let [row, column] = position.split("");
-
-      // Do nothing if the selected position has a token placed already
-      if (board[row][column]) {
-        console.log(
-          "Token already placed at this position. Enter a new value."
-        );
-        return;
-      }
-      board[row][column] = playerToken;
-    }
-  };
-
   const getBoard = () => board;
 
   const setBoard = (row, column, value) => (board[row][column] = value);
+
+  // The position argument here requires only two numbers which corresponds to a row, and a column of the board array
+  const placeToken = function (playerToken, position) {
+    let [row, column] = position.split("");
+
+    // Do nothing if the selected position has a token placed already
+    if (board[row][column]) {
+      console.log("Token already placed at this position. Enter a new value.");
+      return;
+    }
+    board[row][column] = playerToken;
+  };
 
   // Displays the board in the console
   const displayBoard = () => {
@@ -64,6 +59,9 @@ export function GameDirector() {
   let gameBoard = GameBoard();
   let players = [Player("Rick", "O"), Player("Morty", "X")];
   let activePlayer = players[0];
+
+  // Stops the game if the winner has already been declared.
+  let stopGame = false;
 
   const switchPlayerTurn = () =>
     (activePlayer = activePlayer === players[0] ? players[1] : players[0]);
@@ -103,20 +101,28 @@ export function GameDirector() {
     );
   };
 
+  // Will return a boolean if the function performed its operation or not.
   const playRound = (tokenPosition) => {
+    if (stopGame) return false; // Stops the round
+
     gameBoard.placeToken(activePlayer.selector, tokenPosition);
 
     if (checkWinner()) {
       console.log(`${activePlayer.name} wins!`);
       activePlayer.addScore();
-      return;
-    }
+      console.log("score:" + activePlayer.getScore());
+      stopGame = true;
 
-    switchPlayerTurn();
-    gameBoard.displayBoard();
+      return false;
+    } else {
+      switchPlayerTurn();
+    }
+    return true;
   };
 
   const resetGame = () => {
+    stopGame = false;
+
     const boardRow = 3;
     const boardColumn = 3;
     for (let row = 0; row < boardRow; row++) {

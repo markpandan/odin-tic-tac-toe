@@ -1,97 +1,42 @@
-function GameBoard() {
-  const boardRow = 3;
-  const boardColumn = 3;
+import { GameDirector } from "./tic-tac-toe.js";
 
-  let board = [];
-  for (let i = 0; i < boardRow; i++) {
-    board[i] = [];
-    for (let j = 0; j < boardColumn; j++) {
-      board[i].push(null);
-    }
-  }
-
-  // The position argument here requires only two numbers which corresponds to a row, and a column of the board array
-  const placeToken = function (playerToken, position) {
-    [row, column] = position.split("");
-
-    // Do nothing if the selected position has a token placed already
-    if (board[row][column]) {
-      console.log("Token already placed at this position. Enter a new value.");
-      return;
-    }
-    board[row][column] = playerToken;
-  };
-
-  const getBoard = () => board;
-
-  const displayBoard = () => {
-    console.log(
-      board.reduce((a, b, index) => {
-        let row = b.reduce((a, b, index) => {
-          if (b == null) b = "-";
-          if (index == 0) return `${b}`;
-
-          return `${a}, ${b}`;
-        }, "");
-
-        if (index == 0) return `${row}`;
-        return `${a} \n${row}`;
-      }, "")
-    );
-  };
-
-  const reset = () => {
-    for (let i = 0; i < board.length; i++) {
-      board[i] = ["-", "-", "-"];
-    }
-  };
-  const checkWinner = () => {
-    return (
-      (board[0][0] == board[0][1]) == board[0][2] ||
-      (board[0][0] == board[1][0]) == board[2][0] ||
-      (board[0][2] == board[1][2]) == board[2][2] ||
-      (board[2][0] == board[2][1]) == board[2][2] ||
-      (board[0][0] == board[1][1]) == board[2][2] ||
-      (board[0][2] == board[1][1]) == board[2][0]
-    );
-  };
-
-  return { reset, placeToken, displayBoard, getBoard, checkWinner };
-}
-
-function Player(name, selector) {
-  let score = 0;
-  const addScore = () => score++;
-  return { name, selector, addScore };
-}
-
-function GameDirector() {
-  let board = GameBoard();
-  let players = [Player("Rick", 1), Player("Morty", 2)];
-  let activePlayer = players[0];
-
-  const switchPlayerTurn = () =>
-    (activePlayer = activePlayer === players[0] ? players[1] : players[0]);
-
-  const playRound = () => {
-    while (true) {
-      let tokenPosition = prompt(`${activePlayer.name}'s turn. Place a token:`);
-
-      board.placeToken(activePlayer.selector, tokenPosition);
-
-      if (board.checkWinner()) {
-        console.log(`Congratulations! ${activePlayer.name} is the winner`);
-        activePlayer.addScore();
-        break;
-      }
-
-      switchPlayerTurn();
-      board.displayBoard();
-    }
-  };
-
-  return { playRound };
-}
+const player1Name = document.querySelector(".player1-container > h3");
+const player1Score = document.querySelector(".player1-container > p");
+const player2Name = document.querySelector(".player2-container > h3");
+const player2Score = document.querySelector(".player2-container > p");
+const status = document.querySelector(".status");
+const resetBoard = document.querySelector(".reset-board");
 
 const game = GameDirector();
-game.playRound();
+
+// Displays the player names and their scores
+const players = game.getPlayerList();
+player1Name.textContent = players[0].name;
+player1Score.textContent = `Score: ${players[0].getScore()}`;
+player2Name.textContent = players[1].name;
+player2Score.textContent = `Score: ${players[1].getScore()}`;
+
+// Initialize the player's turn status
+status.textContent = `${game.getActivePlayer().name}'s turn`;
+
+const ticTacToeBoard = document.querySelector(".board");
+ticTacToeBoard.addEventListener("click", (e) => {
+  let cell = document.querySelector("#" + e.target.id);
+
+  if (!cell.textContent) {
+    let activePlayer = game.getActivePlayer();
+    cell.textContent = activePlayer.selector;
+
+    game.playRound(cell.dataset.index);
+
+    // game.playRound(cell.dataset.index) ? cell.textContent = activePlayer.selector : "";
+    activePlayer = game.getActivePlayer();
+    status.textContent = `${activePlayer.name}'s turn`;
+  }
+});
+
+resetBoard.addEventListener("click", (e) => {
+  game.resetGame();
+  const board = document.querySelectorAll(".board > *");
+  board.forEach((cell) => (cell.textContent = ""));
+});
